@@ -1,4 +1,6 @@
+print('=' * 25)
 print('Password Audit Report')
+print('=' * 25)
 
 # Collects the information for much much later use and present use
 account = input('What is your Gmail?')
@@ -25,10 +27,13 @@ rotation_years = 365 / rotation_interval
 password_length = len(password)
 length_score = password_length * 10
 
-
+print('=' * 25)
 print('Account:' + account)
 print('Username:' + username)
 print('Password Length:', password_length, 'characters')
 print('Length Score:', length_score, 'points')
 print('Rotation Interval:', rotation_count, 'months')
 print('Rotations (3 yr):', rotation_years)
+print('-' * 25)
+print('NOTE: Classification requires conditionals -- coming in Week 02.')
+print('=' * 25)

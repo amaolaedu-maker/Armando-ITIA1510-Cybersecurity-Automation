@@ -7,6 +7,12 @@ account = input('What is your Gmail?')
 username = input('What is your Username?')
 password = input('What is your Password?')
 
+# This new variable will be checking 
+# if the username is the same as the password
+#  this will be important for a variable later
+not_username = password != username
+
+
 #  The rotation interval is set for 3 years
 #  and the function below will convert it
 #  into an interger for the rotation count
@@ -19,13 +25,36 @@ rotation_interval = int(rotation_interval_string)
 # This is to do two things one creates
 # the rotation count for months
 #  Two divides the rotation interval into proper years
-rotation_count = 36 / rotation_interval
-rotation_years = 365 / rotation_interval
+rotation_count = 36 / rotation_interval 
+rotation_years = 365 / rotation_interval 
+
+
+if rotation_interval > 12:
+    rotation_verdict = 'WARNING — rotation interval exceeds recommended maximum of 12 months'
+elif rotation_interval >= 6 and rotation_interval <= 12:
+    rotation_verdict = 'ACCEPTABLE — rotation interval within recommended range'
+else:
+    rotation_verdict = 'EXCELLENT — frequent rotation policy detected'
+
 
 #  Longer passwords earn a higher reward
 #  Alongside collecting the password length
 password_length = len(password)
 length_score = password_length * 10
+
+# now we will be adding a variable to store 
+# and check the password length 
+length_ok = password_length >= 15
+
+
+# this is a the has digit, It is a variable 
+# that will store and check if the password variable
+# has a number inside of it
+has_digit = '0' in password or '1' in password or '2' in password or '3' in password or '4' in password or '5' in password or '6' in password or '7' in password or '8' in password or '9' in password
+
+# this is combining every boolean check we have made
+# so far into a singular verdict 
+overall_pass = length_ok and has_digit and not_username
 
 print('=' * 25)
 print('Account:' + account)
@@ -35,5 +64,34 @@ print('Length Score:', length_score, 'points')
 print('Rotation Interval:', rotation_count, 'months')
 print('Rotations (3 yr):', rotation_years)
 print('-' * 25)
-print('NOTE: Classification requires conditionals -- coming in Week 02.')
+
+# This is a false statement meant if the
+# Password and user name match
+if not_username is False:
+    print('CRITICAL — password must not match username.')
+else: 
+    print('PASS Username and password do not match')
+
+if length_ok is True:
+    print('STRONG -- meets NIST SP 800-63B recommendations')
+else: 
+    print('WEAK -- Password Length does not meet NIST SP 800-63B recommendations')
+
+# We are checking down here to see 
+# if the has digit activates or not
+if has_digit:
+    print('NOTE: A digit was found in the password.')
+elif not has_digit:
+    print('NOTE: No digit was found in the password.')
+
+print('Rotation Verdict:', rotation_verdict)
+
+print('-' * 25)
+
+# We are checking down here if the overpass meets all of the
+# requirements and prints out a statement depending on if its true or notw
+if overall_pass is True:
+    print('OVERALL: PASS — password meets all checked criteria')
+else:
+    print('OVERALL: FAIL — see findings above')
 print('=' * 25)

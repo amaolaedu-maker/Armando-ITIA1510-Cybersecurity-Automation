@@ -26,7 +26,7 @@ rotation_interval = int(rotation_interval_string)
 # the rotation count for months
 #  Two divides the rotation interval into proper years
 rotation_count = 36 / rotation_interval 
-rotation_years = 365 / rotation_interval 
+rotation_years = 3 / rotation_interval 
 
 
 if rotation_interval > 12:
@@ -41,6 +41,16 @@ else:
 #  Alongside collecting the password length
 password_length = len(password)
 length_score = password_length * 10
+
+# Classify the password length using the required length ranges.
+if password_length < 8:
+    length_verdict = 'WEAK — does not meet minimum length requirements'
+elif password_length <= 11:
+    length_verdict = 'MODERATE — meets minimum but falls short of NIST recommendations'
+elif password_length <= 14:
+    length_verdict = 'GOOD — acceptable length for most systems'
+else:
+    length_verdict = 'STRONG — meets NIST SP 800-63B recommendations'
 
 # now we will be adding a variable to store 
 # and check the password length 
@@ -72,10 +82,7 @@ if not_username is False:
 else: 
     print('PASS Username and password do not match')
 
-if length_ok is True:
-    print('STRONG -- meets NIST SP 800-63B recommendations')
-else: 
-    print('WEAK -- Password Length does not meet NIST SP 800-63B recommendations')
+print(length_verdict)
 
 # We are checking down here to see 
 # if the has digit activates or not
@@ -89,9 +96,11 @@ print('Rotation Verdict:', rotation_verdict)
 print('-' * 25)
 
 # We are checking down here if the overpass meets all of the
-# requirements and prints out a statement depending on if its true or notw
+# requirements and prints out a statement depending on if its true or not
 if overall_pass is True:
     print('OVERALL: PASS — password meets all checked criteria')
 else:
     print('OVERALL: FAIL — see findings above')
+
+
 print('=' * 25)

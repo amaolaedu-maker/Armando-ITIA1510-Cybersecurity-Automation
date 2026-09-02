@@ -1,6 +1,6 @@
-number = int(input())
+number = int(input("input number please and thank you:"))
 
-if number % 5 == 3:
+if number % 3 == 0 and number % 5 == 0:
     print('fizz buzz')
 
 elif number % 3 == 0:
@@ -11,4 +11,3 @@ elif number % 5 == 0:
 
 else: 
     print('No fizz nor buzz')
-

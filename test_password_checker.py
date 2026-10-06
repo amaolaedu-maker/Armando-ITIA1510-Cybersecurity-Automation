@@ -1,28 +1,35 @@
 """Direct assertion tests for the password-checker functions."""
 
-from password_checker import check_length, check_digit, check_username, check_rotation
+from password_checker import check_length, check_digit, check_username, check_rotation, check_breach, known_breached, policy
 
 
 def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 8 tests passed')
+        print('All 10 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs eight password-checker assertions. Takes no parameters. Returns None."""
+    """Runs ten password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
+        # policy: expected value and required setting
+        assert policy["strong_length"] == 15
+        print('PASS: policy includes the expected strong-length requirement')
+
+        assert "require_digit" in policy
+        print('PASS: policy includes the require_digit setting')
+
         # check_length: weak password and strong password
-        length_ok, length_verdict = check_length('pass')
+        length_ok, length_verdict = check_length('pass', policy)
         assert length_ok == False
         print('PASS: check_length correctly identified weak password')
 
-        length_ok, length_verdict = check_length('a' * 16)
+        length_ok, length_verdict = check_length('a' * 16, policy)
         assert length_ok == True
         print('PASS: check_length correctly identified strong password')
 
@@ -45,11 +52,11 @@ def run_tests():
         print('PASS: check_username correctly identified different username and password')
 
         # check_rotation: unacceptable and acceptable intervals
-        rotation_ok, rotation_verdict = check_rotation(18)
+        rotation_ok, rotation_verdict = check_rotation(18, policy)
         assert rotation_ok == False
         print('PASS: check_rotation correctly identified an unacceptable interval')
 
-        rotation_ok, rotation_verdict = check_rotation(6)
+        rotation_ok, rotation_verdict = check_rotation(6, policy)
         assert rotation_ok == True
         print('PASS: check_rotation correctly identified an acceptable interval')
     except AssertionError:

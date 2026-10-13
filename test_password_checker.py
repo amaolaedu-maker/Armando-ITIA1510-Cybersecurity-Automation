@@ -1,20 +1,33 @@
 """Direct assertion tests for the password-checker functions."""
 
-from password_checker import check_length, check_digit, check_username, check_rotation, check_breach, known_breached, policy
+from password_checker import (
+    check_length,
+    check_digit,
+    check_username,
+    check_rotation,
+    check_breach,
+    load_credentials,
+    load_breached,
+    write_report,
+    policy,
+)
+
+
+known_breached = load_breached("breached.txt")
 
 
 def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 10 tests passed')
+        print('All 15 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs ten password-checker assertions. Takes no parameters. Returns None."""
+    """Runs fifteen password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
         # policy: expected value and required setting
@@ -59,6 +72,30 @@ def run_tests():
         rotation_ok, rotation_verdict = check_rotation(6, policy)
         assert rotation_ok == True
         print('PASS: check_rotation correctly identified an acceptable interval')
+
+        # load_credentials: list result and expected dictionary keys
+        credentials = load_credentials('credentials.txt')
+        assert isinstance(credentials, list)
+        print('PASS: load_credentials returned a list')
+
+        assert 'account' in credentials[0]
+        print('PASS: load_credentials returned credential dictionaries with account keys')
+
+        # load_breached: list result and known password
+        breached_passwords = load_breached('breached.txt')
+        assert isinstance(breached_passwords, list)
+        print('PASS: load_breached returned a list')
+
+        assert 'password123' in breached_passwords
+        print('PASS: load_breached included password123')
+
+        # write_report: verify that every supplied line is written to the file
+        test_lines = ['first test line', 'second test line']
+        write_report(test_lines, 'test_report.txt')
+        with open('test_report.txt', 'r') as f:
+            report_text = f.read()
+        assert report_text == 'first test line\nsecond test line\n'
+        print('PASS: write_report wrote the expected report text')
     except AssertionError:
         # Show a summary before raising the error so a failed test is obvious.
         print_test_summary(False)

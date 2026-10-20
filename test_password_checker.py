@@ -1,5 +1,7 @@
 """Direct assertion tests for the password-checker functions."""
 
+from pathlib import Path
+
 from password_checker import (
     check_length,
     check_digit,
@@ -9,25 +11,28 @@ from password_checker import (
     load_credentials,
     load_breached,
     write_report,
+    save_summary,
+    load_summary,
     policy,
 )
 
 
-known_breached = load_breached("breached.txt")
+TEST_DIR = Path(__file__).resolve().parent
+known_breached = load_breached(TEST_DIR / "breached.txt")
 
 
 def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 15 tests passed')
+        print('All 18 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs fifteen password-checker assertions. Takes no parameters. Returns None."""
+    """Runs eighteen password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
         # policy: expected value and required setting
@@ -74,7 +79,7 @@ def run_tests():
         print('PASS: check_rotation correctly identified an acceptable interval')
 
         # load_credentials: list result and expected dictionary keys
-        credentials = load_credentials('credentials.txt')
+        credentials = load_credentials(TEST_DIR / 'credentials.txt')
         assert isinstance(credentials, list)
         print('PASS: load_credentials returned a list')
 
@@ -82,7 +87,7 @@ def run_tests():
         print('PASS: load_credentials returned credential dictionaries with account keys')
 
         # load_breached: list result and known password
-        breached_passwords = load_breached('breached.txt')
+        breached_passwords = load_breached(TEST_DIR / 'breached.txt')
         assert isinstance(breached_passwords, list)
         print('PASS: load_breached returned a list')
 
@@ -91,11 +96,34 @@ def run_tests():
 
         # write_report: verify that every supplied line is written to the file
         test_lines = ['first test line', 'second test line']
-        write_report(test_lines, 'test_report.txt')
-        with open('test_report.txt', 'r') as f:
+        write_report(test_lines, TEST_DIR / 'test_report.txt')
+        with open(TEST_DIR / 'test_report.txt', 'r') as f:
             report_text = f.read()
         assert report_text == 'first test line\nsecond test line\n'
         print('PASS: write_report wrote the expected report text')
+
+        # save_summary/load_summary: preserve data and avoid writing passwords to JSON
+        sample = {
+            'total': 2,
+            'passed': 1,
+            'failed': 1,
+            'critical': 1,
+            'failed_accounts': ['Gmail'],
+            'critical_accounts': ['Gmail'],
+        }
+        save_summary(sample, TEST_DIR / 'test_summary.json')
+        loaded_summary = load_summary(TEST_DIR / 'test_summary.json')
+
+        assert loaded_summary == sample
+        print('PASS: save_summary and load_summary gave back the same dictionary')
+
+        assert isinstance(loaded_summary['failed_accounts'], list)
+        print('PASS: loaded failed_accounts is a list')
+
+        with open(TEST_DIR / 'test_summary.json', 'r', encoding='utf-8') as f:
+            saved_summary_text = f.read()
+        assert all(credential['password'] not in saved_summary_text for credential in credentials)
+        print('PASS: saved summary does not contain credential passwords')
     except AssertionError:
         # Show a summary before raising the error so a failed test is obvious.
         print_test_summary(False)

@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+
+
 policy = {
     "min_length": 8,
     "strong_length": 15,
@@ -43,6 +47,18 @@ def write_report(report_lines, filepath):
     with open(filepath, "w", encoding="utf-8") as f:
         for line in report_lines:
             f.write(line + "\n")
+
+
+def save_summary(summary, filepath):
+    """Write the summary dictionary to a JSON file."""
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+
+
+def load_summary(filepath):
+    """Read and return the summary dictionary from a JSON file."""
+    with open(filepath, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def check_length(password, policy):
@@ -165,8 +181,9 @@ def audit_password(account, username, password, rotation_interval, known_breache
 
 
 if __name__ == '__main__':
-    credentials = load_credentials("credentials.txt")
-    known_breached = load_breached("breached.txt")
+    base_dir = Path(__file__).resolve().parent
+    credentials = load_credentials(base_dir / "credentials.txt")
+    known_breached = load_breached(base_dir / "breached.txt")
     report_lines = []
 
     batch_size = len(credentials)

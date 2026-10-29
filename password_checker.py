@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 
@@ -9,6 +10,7 @@ policy = {
     "good_rotation_months": 6,
     "require_digit": True,
     "check_breach_list": True,
+    "history_runs": 3,
 }
 
 
@@ -55,10 +57,41 @@ def save_summary(summary, filepath):
         json.dump(summary, f, indent=2)
 
 
+def save_history(history, filepath):
+    """Write the audit history list to a JSON file."""
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(history, f, indent=2)
+
+
 def load_summary(filepath):
     """Read and return the summary dictionary from a JSON file."""
     with open(filepath, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_history(filepath):
+    """Return saved audit history, or an empty list when it does not exist."""
+    if not os.path.exists(filepath):
+        return []
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def add_to_history(history, summary, keep):
+    """Add one audit summary and return the newest requested history entries."""
+    if history:
+        run_number = history[-1]["run"] + 1
+    else:
+        run_number = 1
+
+    history.append({
+        "run": run_number,
+        "total": summary["total"],
+        "failed": summary["failed"],
+        "critical": summary["critical"],
+    })
+    return history[-keep:]
 
 
 def check_length(password, policy):
@@ -235,3 +268,8 @@ if __name__ == '__main__':
     for line in report_lines:
         print(line)
     write_report(report_lines, "report.txt")
+    save_summary(summary, "summary.json")
+
+    history = load_history("audit_history.json")
+    history = add_to_history(history, summary, policy["history_runs"])
+    save_history(history, "audit_history.json")

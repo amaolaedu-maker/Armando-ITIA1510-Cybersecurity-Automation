@@ -13,6 +13,9 @@ from password_checker import (
     write_report,
     save_summary,
     load_summary,
+    load_history,
+    add_to_history,
+    save_history,
     policy,
 )
 
@@ -25,14 +28,14 @@ def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 18 tests passed')
+        print('All 22 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs eighteen password-checker assertions. Takes no parameters. Returns None."""
+    """Runs twenty-two password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
         # policy: expected value and required setting
@@ -124,6 +127,25 @@ def run_tests():
             saved_summary_text = f.read()
         assert all(credential['password'] not in saved_summary_text for credential in credentials)
         print('PASS: saved summary does not contain credential passwords')
+
+        # history: first-run loading, numbering, trimming, and JSON round trip
+        assert load_history(TEST_DIR / 'test_missing_history.json') == []
+        print('PASS: load_history returned an empty list for a missing file')
+
+        history = add_to_history([], sample, 2)
+        assert len(history) == 1 and history[0]['run'] == 1
+        print('PASS: add_to_history started an empty history at run 1')
+
+        history = []
+        for i in range(3):
+            history = add_to_history(history, sample, 2)
+        assert [entry['run'] for entry in history] == [2, 3]
+        print('PASS: add_to_history kept only the newest 2 runs')
+
+        history_file = TEST_DIR / 'test_audit_history.json'
+        save_history(history, history_file)
+        assert load_history(history_file) == history
+        print('PASS: save_history and load_history gave back the same history')
     except AssertionError:
         # Show a summary before raising the error so a failed test is obvious.
         print_test_summary(False)

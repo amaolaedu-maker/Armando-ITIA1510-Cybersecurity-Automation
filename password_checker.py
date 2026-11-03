@@ -155,6 +155,21 @@ def check_breach(password, known_breached):
     return not_breached
 
 
+def breach_verdicts(username, credentials, known_breached):
+    """Return breach-list verdicts for every credential belonging to *username*."""
+    accounts = []
+    for credential in credentials:
+        if credential["username"] == username:
+            accounts.append({
+                "account": credential["account"],
+                "on_breach_list": not check_breach(
+                    credential["password"], known_breached
+                ),
+            })
+
+    return {"username": username, "accounts": accounts}
+
+
 def audit_password(account, username, password, rotation_interval, known_breached, policy, report_lines):
     """Append one password audit to report_lines and return its pass, fail, and critical deltas."""
     length_ok, length_verdict = check_length(password, policy)
@@ -273,3 +288,8 @@ if __name__ == '__main__':
     history = load_history("audit_history.json")
     history = add_to_history(history, summary, policy["history_runs"])
     save_history(history, "audit_history.json")
+
+    verdicts = breach_verdicts("jsmith", credentials, known_breached)
+    print(json.dumps(verdicts, indent=2))
+    with open("breach_check.json", "w", encoding="utf-8") as f:
+        json.dump(verdicts, f, indent=2)

@@ -1,5 +1,6 @@
 """Direct assertion tests for the password-checker functions."""
 
+import json
 from pathlib import Path
 
 from password_checker import (
@@ -8,6 +9,7 @@ from password_checker import (
     check_username,
     check_rotation,
     check_breach,
+    breach_verdicts,
     load_credentials,
     load_breached,
     write_report,
@@ -28,14 +30,14 @@ def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 22 tests passed')
+        print('All 25 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs twenty-two password-checker assertions. Takes no parameters. Returns None."""
+    """Runs twenty-five password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
         # policy: expected value and required setting
@@ -96,6 +98,25 @@ def run_tests():
 
         assert 'password123' in breached_passwords
         print('PASS: load_breached included password123')
+
+        # breach_verdicts: known breached account, unknown username, and no passwords exposed
+        result = breach_verdicts("jsmith", credentials, known_breached)
+        assert result["accounts"][0] == {"account": "Gmail", "on_breach_list": True}
+        print('PASS: breach_verdicts marked the Gmail password as on the breach list')
+
+        result = breach_verdicts("nobody", credentials, known_breached)
+        assert result["accounts"] == []
+        print('PASS: breach_verdicts returned no accounts for nobody')
+
+        result = breach_verdicts("jsmith", credentials, known_breached)
+        result_text = json.dumps(result)
+        credential_passwords = [
+            credential["password"]
+            for credential in credentials
+            if credential["account"] != "SSH Server"
+        ]
+        assert all(password not in result_text for password in credential_passwords)
+        print('PASS: breach_verdicts result contains no credential passwords')
 
         # write_report: verify that every supplied line is written to the file
         test_lines = ['first test line', 'second test line']

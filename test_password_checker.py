@@ -10,6 +10,9 @@ from password_checker import (
     check_rotation,
     check_breach,
     breach_verdicts,
+    length_verdicts,
+    rotation_verdicts,
+    run_check,
     load_credentials,
     load_breached,
     write_report,
@@ -30,14 +33,14 @@ def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 25 tests passed')
+        print('All 29 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs twenty-five password-checker assertions. Takes no parameters. Returns None."""
+    """Runs twenty-nine password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
         # policy: expected value and required setting
@@ -117,6 +120,29 @@ def run_tests():
         ]
         assert all(password not in result_text for password in credential_passwords)
         print('PASS: breach_verdicts result contains no credential passwords')
+
+        # New verdict helpers and dispatcher: expected results and unknown check rejection
+        result = length_verdicts("jsmith", credentials, known_breached)
+        assert result["accounts"][2] == {"account": "VPN", "long_enough": True}
+        print('PASS: length_verdicts marked the third jsmith account as long enough')
+
+        result = rotation_verdicts("jsmith", credentials, known_breached)
+        assert result["accounts"][1] == {
+            "account": "SSH Server",
+            "rotation_months": 24,
+            "rotation_ok": False,
+        }
+        print('PASS: rotation_verdicts reported the SSH Server rotation failure')
+
+        assert run_check("check_breach", "jsmith", credentials, known_breached) == (
+            breach_verdicts("jsmith", credentials, known_breached)
+        )
+        print('PASS: run_check dispatched check_breach to breach_verdicts')
+
+        assert run_check(
+            "reset_password", "jsmith", credentials, known_breached
+        ) == {"error": "unknown check"}
+        print('PASS: run_check refused a name that is not one of its checks')
 
         # write_report: verify that every supplied line is written to the file
         test_lines = ['first test line', 'second test line']

@@ -170,6 +170,52 @@ def breach_verdicts(username, credentials, known_breached):
     return {"username": username, "accounts": accounts}
 
 
+def length_verdicts(username, credentials, known_breached):
+    """Return password-length verdicts for every credential belonging to *username*."""
+    accounts = []
+    for credential in credentials:
+        if credential["username"] == username:
+            long_enough, _ = check_length(credential["password"], policy)
+            accounts.append({
+                "account": credential["account"],
+                "long_enough": long_enough,
+            })
+
+    return {"username": username, "accounts": accounts}
+
+
+def rotation_verdicts(username, credentials, known_breached):
+    """Return rotation verdicts for every credential belonging to *username*."""
+    accounts = []
+    for credential in credentials:
+        if credential["username"] == username:
+            rotation_interval = credential["rotation_interval"]
+            rotation_ok, _ = check_rotation(rotation_interval, policy)
+            accounts.append({
+                "account": credential["account"],
+                "rotation_months": rotation_interval,
+                "rotation_ok": rotation_ok,
+            })
+
+    return {"username": username, "accounts": accounts}
+
+
+CHECK_NAMES = ["check_breach", "check_length", "check_rotation"]
+
+
+def run_check(check_name, username, credentials, known_breached):
+    """Run the verdict helper associated with *check_name* for *username*."""
+    verdict_functions = {
+        "check_breach": breach_verdicts,
+        "check_length": length_verdicts,
+        "check_rotation": rotation_verdicts,
+    }
+    if check_name not in CHECK_NAMES:
+        return {"error": "unknown check"}
+
+    return verdict_functions[check_name](username, credentials, known_breached)
+
+
 def audit_password(account, username, password, rotation_interval, known_breached, policy, report_lines):
     """Append one password audit to report_lines and return its pass, fail, and critical deltas."""
     length_ok, length_verdict = check_length(password, policy)
@@ -293,3 +339,11 @@ if __name__ == '__main__':
     print(json.dumps(verdicts, indent=2))
     with open("breach_check.json", "w", encoding="utf-8") as f:
         json.dump(verdicts, f, indent=2)
+
+    all_checks = {}
+    for check_name in CHECK_NAMES:
+        all_checks[check_name] = run_check(
+            check_name, "jsmith", credentials, known_breached
+        )
+    with open("all_checks.json", "w", encoding="utf-8") as f:
+        json.dump(all_checks, f, indent=2)

@@ -1,0 +1,23 @@
+{
+  "exported_from": "corp-directory",
+  "policy": {"min_length": 12, "max_rotation_days": 90},
+  "breached": ["password", "password123", "123456", "qwerty", "letmein", "summer2024!"],
+  "accounts": [
+    {"service": "Gmail", "username": "jsmith", "password": "password123", "rotation_days": 12,
+     "owner": {"name": "Jordan Smith", "email": "jsmith@example.com"}, "mfa": true},
+    {"service": "SSH Server", "username": "jsmith", "password": "jsmith", "rotation_days": 24,
+     "owner": {"name": "Jordan Smith", "email": "jsmith@example.com"}},
+    {"service": "VPN", "username": "jsmith", "password": "Tr0ub4dor&3correct", "rotation_days": 3,
+     "owner": {"name": "Jordan Smith", "email": "jsmith@example.com"}, "mfa": true},
+    {"service": "Company Email", "username": "akim", "password": "summer2024!", "rotation_days": 6,
+     "owner": {"name": "Alex Kim", "email": "akim@example.com"}, "mfa": true},
+    {"service": "Payroll", "username": "akim", "password": "Blue-Kettle-Morning-42", "rotation_days": 120,
+     "owner": {"name": "Alex Kim", "email": "akim@example.com"}, "mfa": true},
+    {"service": "Wiki", "username": "slee", "password": "letmein", "rotation_days": 30,
+     "owner": {"name": "Sam Lee", "email": "slee@example.com"}, "mfa": false},
+    {"service": "GitHub", "username": "slee", "password": "correct-horse-battery-staple", "rotation_days": 45,
+     "owner": {"name": "Sam Lee", "email": "slee@example.com"}, "mfa": true},
+    {"service": "Backup Server", "username": "svc_backup", "password": "svc_backup", "rotation_days": 400,
+     "owner": {"name": "IT Operations", "email": "itops@example.com"}}
+  ]
+}

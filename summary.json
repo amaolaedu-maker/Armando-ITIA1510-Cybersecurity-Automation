@@ -1,0 +1,15 @@
+{
+  "total": 5,
+  "passed": 2,
+  "failed": 3,
+  "critical": 2,
+  "failed_accounts": [
+    "Gmail",
+    "SSH Server",
+    "Company Email"
+  ],
+  "critical_accounts": [
+    "Gmail",
+    "SSH Server"
+  ]
+}

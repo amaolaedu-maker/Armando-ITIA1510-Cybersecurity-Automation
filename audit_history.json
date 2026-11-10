@@ -1,0 +1,20 @@
+[
+  {
+    "run": 1,
+    "total": 5,
+    "failed": 3,
+    "critical": 2
+  },
+  {
+    "run": 2,
+    "total": 5,
+    "failed": 3,
+    "critical": 2
+  },
+  {
+    "run": 3,
+    "total": 5,
+    "failed": 3,
+    "critical": 2
+  }
+]

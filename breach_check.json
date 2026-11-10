@@ -1,0 +1,25 @@
+{
+  "username": "jsmith",
+  "accounts": [
+    {
+      "account": "Gmail",
+      "on_breach_list": true
+    },
+    {
+      "account": "SSH Server",
+      "on_breach_list": false
+    },
+    {
+      "account": "VPN",
+      "on_breach_list": false
+    },
+    {
+      "account": "Company Email",
+      "on_breach_list": false
+    },
+    {
+      "account": "GitHub",
+      "on_breach_list": false
+    }
+  ]
+}

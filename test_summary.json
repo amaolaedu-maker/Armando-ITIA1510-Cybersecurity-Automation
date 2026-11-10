@@ -1,0 +1,12 @@
+{
+  "total": 2,
+  "passed": 1,
+  "failed": 1,
+  "critical": 1,
+  "failed_accounts": [
+    "Gmail"
+  ],
+  "critical_accounts": [
+    "Gmail"
+  ]
+}

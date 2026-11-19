@@ -1,7 +1,10 @@
 """Direct assertion tests for the password-checker functions."""
 
 import json
+import os
 from pathlib import Path
+
+import password_checker
 
 from password_checker import (
     check_length,
@@ -13,6 +16,8 @@ from password_checker import (
     length_verdicts,
     rotation_verdicts,
     run_check,
+    log_check,
+    read_audit_log,
     load_credentials,
     load_breached,
     write_report,
@@ -27,20 +32,21 @@ from password_checker import (
 
 TEST_DIR = Path(__file__).resolve().parent
 known_breached = load_breached(TEST_DIR / "breached.txt")
+password_checker.AUDIT_LOG = "test_audit_log.jsonl"
 
 
 def print_test_summary(all_tests_passed):
     """Prints the test summary. Takes all_tests_passed: bool. Returns None."""
     if all_tests_passed:
         print('-' * 50)
-        print('All 29 tests passed')
+        print('All 32 tests passed')
     else:
         print('-' * 50)
         print('FAIL: One or more tests failed.')
 
 
 def run_tests():
-    """Runs twenty-nine password-checker assertions. Takes no parameters. Returns None."""
+    """Runs thirty-two password-checker assertions. Takes no parameters. Returns None."""
     try:
         # Each assertion checks one expected result before its PASS message is printed.
         # policy: expected value and required setting
@@ -193,6 +199,33 @@ def run_tests():
         save_history(history, history_file)
         assert load_history(history_file) == history
         print('PASS: save_history and load_history gave back the same history')
+
+        # Start the audit-log tests with a fresh test log.
+        if os.path.exists("test_audit_log.jsonl"):
+            os.remove("test_audit_log.jsonl")
+
+        result = length_verdicts("jsmith", credentials, known_breached)
+        log_check("check_length", "jsmith", result, "test_audit_log.jsonl")
+        entries = read_audit_log("test_audit_log.jsonl")
+        assert set(entries[0]) == {"check", "result", "time", "username"}
+        print('PASS: log_check wrote exactly the required entry keys')
+
+        run_check("check_length", "jsmith", credentials, known_breached)
+        run_check("reset_password", "jsmith", credentials, known_breached)
+        entries = read_audit_log("test_audit_log.jsonl")
+        assert [entry["check"] for entry in entries] == [
+            "check_length", "check_length", "reset_password"
+        ]
+        print('PASS: run_check logged the accepted and refused checks in order')
+
+        with open("test_audit_log.jsonl", "r", encoding="utf-8") as f:
+            log_text = f.read()
+        assert all(
+            credential["password"] not in log_text
+            for credential in credentials
+            if credential["account"] != "SSH Server"
+        )
+        print('PASS: audit log contains no credential passwords except the SSH username')
     except AssertionError:
         # Show a summary before raising the error so a failed test is obvious.
         print_test_summary(False)
